@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>财务自由计算器 | Financial Independence Calculator</title>
+<style>
+:root{--bg:#281934;--panel:#3b294d;--panel2:#2d1c3c;--gold:#e8d354;--text:#f7f1fb;--muted:#b9a9c8;--line:#8d7b9d;--input:#fff;--ink:#332440}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#392349 0%,var(--bg) 62%);color:var(--text);font:16px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;padding:32px 18px}
+.shell{max-width:1060px;margin:0 auto}.topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:14px}.lang{background:transparent;border:1px solid #8b769b;color:var(--text);padding:8px 13px;border-radius:10px;cursor:pointer;font-weight:700}.card{background:var(--panel);border-radius:22px;padding:34px 40px 30px;box-shadow:0 16px 40px #140d1b66;border:1px solid #ffffff08}.head{text-align:center;margin-bottom:28px}.head h1{margin:0;color:var(--gold);font-size:clamp(27px,4vw,36px);letter-spacing:.02em}.formula{color:var(--muted);font-weight:750;font-size:21px;margin-top:4px}.intro{color:var(--muted);margin:9px auto 0;max-width:700px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:28px;align-items:start}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}.field{min-width:0}.field label,.target-label{display:block;color:#d5c8df;font-weight:650;margin-bottom:7px}.field input,.field select,.target-input{width:100%;padding:12px 13px;border:1px solid #e6dfea;border-radius:9px;background:var(--input);color:var(--ink);font:inherit;font-weight:700;outline:none}.field input:focus,.field select:focus,.target-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #e8d35430}.field small{display:block;color:var(--muted);font-size:12px;margin-top:5px}.wide{grid-column:1/-1}.rate-wrap{display:flex;gap:8px}.rate-wrap input{flex:1;min-width:0}.rate-wrap span{display:flex;align-items:center;color:var(--ink);background:#fff;border-radius:9px;padding:0 12px;font-weight:700}.aside{background:var(--panel2);border-radius:14px;padding:17px 17px 15px;color:var(--muted);font-size:14px}.aside h3{color:var(--gold);font-size:16px;margin:0 0 10px}.rate-note{padding:10px 0;border-bottom:1px solid #ffffff18}.rate-note:last-of-type{border-bottom:0}.rate-note strong{color:var(--text)}.caveat{font-size:12px;line-height:1.55;margin-top:13px;color:#a995b8}.picker{margin-bottom:22px}.picker>label{display:block;color:#d5c8df;font-weight:650;margin-bottom:9px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:transparent;border:1px solid #8b769b;color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-weight:700}.chip:hover{border-color:var(--gold)}.chip.active{background:var(--gold);border-color:var(--gold);color:#342344}.picker small{display:block;color:var(--muted);font-size:12px;margin-top:8px}.field input:disabled{background:#4a3a5c;color:#d9cbe6;border-color:#6b5a7d;cursor:not-allowed}.field.solving label{color:var(--gold)}.rate-wrap input:disabled+span{background:#4a3a5c;color:#d9cbe6}.action-row{margin-top:24px}.curr{display:flex;gap:6px;margin-right:auto}.curr .lang{padding:8px 11px}.curr .lang.active{background:var(--gold);border-color:var(--gold);color:#342344}.calc{width:100%;border:0;border-radius:10px;padding:13px 25px;background:var(--gold);color:#342344;font:inherit;font-weight:850;cursor:pointer;min-height:48px}.calc:hover{filter:brightness(1.05)}.result{margin-top:24px;text-align:center;background:#2d1c3c;border-radius:14px;padding:22px 18px}.result-label{color:var(--muted);font-weight:650}.result-value{color:var(--gold);font-size:clamp(30px,5vw,44px);font-weight:850;line-height:1.25;overflow-wrap:anywhere;margin:6px 0}.result-detail{color:#c3b4d0;font-size:14px}.error{color:#ffd1d1;margin-top:10px;font-size:14px}.hidden{display:none!important}.foot{color:#a995b8;text-align:center;font-size:12px;margin:18px 0 0}
+@media(max-width:760px){.card{padding:25px 19px}.layout{grid-template-columns:1fr}.aside{order:2}.fields{gap:15px 12px}.field label{font-size:14px}}
+@media(max-width:430px){.fields{grid-template-columns:1fr}.wide{grid-column:auto}.head h1{font-size:26px}.formula{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar"><div class="curr" id="currGroup" role="group" aria-label="Currency"><button class="lang" type="button" data-cur="CNY">CNY ¥</button><button class="lang" type="button" data-cur="JPY">JPY ¥</button><button class="lang" type="button" data-cur="USD">USD $</button><button class="lang" type="button" data-cur="EUR">EUR €</button></div><button class="lang" id="langBtn" type="button">English</button></div>
+  <main class="card">
+    <header class="head">
+      <h1 data-i18n="title">多少钱才能财务自由？</h1>
+      <div class="formula">T = 12X ÷ r + K × n + M + H</div>
+      <p class="intro" data-i18n="intro">调整参数，选择想要求解的变量，然后点击计算。金额单位均为万元；投资回报率按年化百分比输入。</p>
+    </header>
+    <div class="layout">
+      <section>
+        <div class="picker"><label data-i18n="unknown">我想要求解的变量</label><div class="chips" id="chips">
+          <button type="button" class="chip" data-var="T" data-i18n="solveT">所需总资产 T</button>
+          <button type="button" class="chip" data-var="X" data-i18n="solveX">月开销 X</button>
+          <button type="button" class="chip" data-var="K" data-i18n="solveK">每孩成本 K</button>
+          <button type="button" class="chip" data-var="n" data-i18n="solveN">小孩数 n</button>
+          <button type="button" class="chip" data-var="M" data-i18n="solveM">健康开销 M</button>
+          <button type="button" class="chip" data-var="H" data-i18n="solveH">重大投入 H</button>
+          <button type="button" class="chip" data-var="r" data-i18n="solveR">回报率 r</button>
+        </div><small data-i18n="unknownHelp"></small></div>
+        <div class="fields">
+          <div class="field" data-f="T"><label for="T" data-i18n="target">目标总资产 T</label><input id="T" type="number" min="0" step="any" value="2000"></div>
+          <div class="field" data-f="X"><label for="X" data-i18n="x">月开销 X</label><input id="X" type="number" min="0" step="any" value="3"></div>
+          <div class="field" data-f="K"><label for="K" data-i18n="k">每孩成本 K</label><input id="K" type="number" min="0" step="any" value="80"></div>
+          <div class="field" data-f="n"><label for="n" data-i18n="n">小孩数 n</label><input id="n" type="number" min="0" step="1" value="2"></div>
+          <div class="field" data-f="M"><label for="M" data-i18n="m">健康开销 M</label><input id="M" type="number" min="0" step="any" value="100"></div>
+          <div class="field" data-f="H"><label for="H" data-i18n="h">重大投入 H</label><input id="H" type="number" min="0" step="any" value="300"></div>
+          <div class="field wide" data-f="r"><label for="r" data-i18n="r">年化投资回报率 r</label><div class="rate-wrap"><input id="r" type="number" min="0.01" max="100" step="any" value="2.5"><span>%</span></div><small data-i18n="rHelp"></small></div>
+        </div>
+        <div class="action-row"><button class="calc" id="calculate" data-i18n="calculate" type="button">计算结果</button></div>
+        <div class="result" aria-live="polite">
+          <div class="result-label" id="resultLabel" data-i18n="resultT">所需财务自由资产</div>
+          <div class="result-value" id="resultValue">2,960 万元</div>
+          <div class="result-detail" id="resultDetail">基于当前输入参数</div>
+          <div class="error hidden" id="error"></div>
+        </div>
+      </section>
+      <aside class="aside">
+        <h3 data-i18n="rateTitle">年化投资回报率参考</h3>
+        <div class="rate-note"><strong data-i18n="china">中国参考：2.5%</strong><br><span data-i18n="chinaDesc">较保守的规划假设，可作为示例而非保证收益。</span></div>
+        <div class="rate-note"><strong data-i18n="us">美国参考：4%</strong><br><span data-i18n="usDesc">常见的长期规划假设之一；实际结果取决于资产配置、通胀、税费与市场波动。</span></div>
+        <p class="caveat" data-i18n="caveat">这些百分比是计算情景，不代表任何国家的固定或无风险收益率。请考虑通胀、税费、风险和资金期限。</p>
+      </aside>
+    </div>
+  </main>
+  <p class="foot" data-i18n="foot">仅供个人规划与教育用途，不构成投资建议。</p>
+</div>
+<script>
+const translations = {
+  "zh-CN": {
+    title:"多少钱才能财务自由？", intro:"先选择想要求解的变量，该变量的输入框会被锁定；填写其余参数后点击计算。金额单位为「万」所选货币；投资回报率按年化百分比输入。",
+    x:"月开销 X（{u}）", k:"每孩成本 K（{u}）", n:"小孩数 n（个）", m:"健康开销 M（{u}）", h:"重大投入 H（{u}）", r:"年化投资回报率 r", rHelp:"输入百分数，例如 2.5 表示 2.5%",
+    unknown:"我想要求解的变量", solveT:"总资产 T", solveX:"月开销 X", solveK:"每孩成本 K", solveN:"小孩数 n", solveM:"健康开销 M", solveH:"重大投入 H", solveR:"回报率 r",
+    unknownHelp:"被选中的变量将由计算得出，其输入框不可编辑。", target:"总资产 T（{u}）", calculate:"计算结果", resultT:"所需财务自由资产", based:"基于当前输入参数", rateTitle:"年化投资回报率参考", china:"中国参考：2.5%", chinaDesc:"较保守的规划假设，可作为示例而非保证收益。", us:"美国参考：4%", usDesc:"常见的长期规划假设之一；实际结果取决于资产配置、通胀、税费与市场波动。", caveat:"这些百分比是计算情景，不代表任何国家的固定或无风险收益率。请考虑通胀、税费、风险和资金期限。", foot:"仅供个人规划与教育用途，不构成投资建议。",
+    errInput:"请检查输入：所有数值必须有效，且非负；年化回报率必须大于 0%。", errNo:"当前参数下无法求出有效结果（可能需要除以 0 或结果为负）。", result:"求解结果", month:"万 {c}/月", unitWan:"万 {c}", children:"个孩子", percent:"%", formula:"计算依据：T = 12X ÷ (r/100) + K × n + M + H", targetPrefix:"总资产"
+  },
+  "en": {
+    title:"How Much Do You Need for Financial Independence?", intro:"Choose the variable to solve for (its field gets locked), fill in the rest, then calculate. Amounts are in units of 10,000 of the selected currency; enter annualized return as a percentage.",
+    x:"Monthly spending X ({u})", k:"Cost per child K ({u})", n:"Number of children n", m:"Health expenses M ({u})", h:"Major expenses H ({u})", r:"Annualized investment return r", rHelp:"Enter a percentage: 2.5 means 2.5%.",
+    unknown:"Variable to solve for", solveT:"Total assets T", solveX:"Monthly spending X", solveK:"Cost per child K", solveN:"Children n", solveM:"Health expenses M", solveH:"Major expenses H", solveR:"Return r",
+    unknownHelp:"The selected variable is computed for you, so its input is not editable.", target:"Total assets T ({u})", calculate:"Calculate", resultT:"Assets needed for financial independence", based:"Based on the current assumptions", rateTitle:"Annualized return reference points", china:"China reference: 2.5%", chinaDesc:"A relatively conservative planning assumption, not a guaranteed return.", us:"US reference: 4%", usDesc:"One commonly used long-term planning assumption; actual outcomes depend on allocation, inflation, taxes, fees, and market volatility.", caveat:"These percentages are illustrative planning scenarios, not fixed or risk-free returns for either country. Consider inflation, taxes, fees, risk, and time horizon.", foot:"For educational and personal-planning purposes only; not investment advice.",
+    errInput:"Check your inputs: values must be valid and non-negative, and the annualized return must be above 0%.", errNo:"No valid solution for these assumptions (a zero divisor or negative result may be involved).", result:"Solved value", month:"×10,000 {c}/month", unitWan:"×10,000 {c}", children:"children", percent:"%", formula:"Formula: T = 12X ÷ (r/100) + K × n + M + H", targetPrefix:"Total assets"
+  }
+};
+let lang="zh-CN", cur="CNY", unknown="T";
+const $=id=>document.getElementById(id);
+const defaults={};document.querySelectorAll(".field[data-f] input").forEach(i=>defaults[i.id]=i.value);
+const unitShort=()=>lang==="en"?"×10,000 "+cur:"万"+cur;
+function t(key){return (translations[lang][key]||key).replace("{u}",unitShort()).replace("{c}",cur)}
+function applyLanguage(){
+ document.documentElement.lang=lang;
+ document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.dataset.i18n)});
+ $("langBtn").textContent=lang==="zh-CN"?"English":"中文";
+ $("resultLabel").textContent=unknown==="T"?t("resultT"):t("result");
+ $("error").classList.add("hidden");
+}
+function applyUnknown(){
+ document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c.dataset.var===unknown));
+ document.querySelectorAll(".field[data-f]").forEach(f=>{const on=f.dataset.f===unknown;f.classList.toggle("solving",on);const i=f.querySelector("input");i.disabled=on;i.placeholder=on?"—":"";if(on)i.value="";else if(i.value==="")i.value=defaults[i.id]});
+ $("resultLabel").textContent=unknown==="T"?t("resultT"):t("result");
+ $("error").classList.add("hidden");
+}
+function applyCurrency(){document.querySelectorAll("[data-cur]").forEach(b=>b.classList.toggle("active",b.dataset.cur===cur))}
+$("langBtn").addEventListener("click",()=>{lang=lang==="zh-CN"?"en":"zh-CN";applyLanguage();calculate()});
+$("chips").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;unknown=c.dataset.var;applyUnknown();calculate()});
+$("currGroup").addEventListener("click",e=>{const b=e.target.closest("[data-cur]");if(!b)return;cur=b.dataset.cur;applyCurrency();applyLanguage();calculate()});
+const num=id=>Number($(id).value);
+const fmt=v=>new Intl.NumberFormat(lang==="en"?"en-US":"zh-CN",{maximumFractionDigits:4}).format(v);
+function calculate(){
+ const u=unknown,X=num("X"),K=num("K"),n=num("n"),M=num("M"),H=num("H"),r=num("r"),T=num("T");
+ const error=$("error");error.classList.add("hidden");
+ const vals={T,X,K,n,M,H,r};
+ if(Object.keys(vals).some(k=>k!==u&&(!Number.isFinite(vals[k])||vals[k]<0))||(u!=="r"&&r<=0)){error.textContent=t("errInput");error.classList.remove("hidden");return}
+ const rr=r/100,base=K*n+M+H;
+ let value,unit=t("unitWan"),label=t("solveT");
+ if(u==="T"){value=12*X/rr+base;label=t("resultT")}
+ if(u==="X"){value=(T-base)*rr/12;unit=t("month");label=t("solveX")}
+ if(u==="K"){value=n===0?NaN:(T-12*X/rr-M-H)/n;label=t("solveK")}
+ if(u==="n"){value=K===0?NaN:(T-12*X/rr-M-H)/K;unit=t("children");label=t("solveN")}
+ if(u==="M"){value=T-12*X/rr-K*n-H;label=t("solveM")}
+ if(u==="H"){value=T-12*X/rr-K*n-M;label=t("solveH")}
+ if(u==="r"){const rem=T-base;value=rem<=0?NaN:12*X/rem*100;unit=t("percent");label=t("solveR")}
+ if(!Number.isFinite(value)||value<0){error.textContent=t("errNo");error.classList.remove("hidden");$("resultValue").textContent="—";$("resultDetail").textContent="";return}
+ $("resultLabel").textContent=label;
+ $("resultValue").textContent=fmt(value)+" "+(u==="r"?"%":unit);
+ $("resultDetail").textContent=u==="T"?t("formula"):t("targetPrefix")+" T = "+fmt(T)+" "+t("unitWan");
+}
+$("calculate").addEventListener("click",calculate);
+applyCurrency();applyLanguage();applyUnknown();calculate();
+</script>
+</body>
+</html>
